@@ -95,6 +95,7 @@ def input_loop(key2ph):
             print("\nKey2Ph Table:")
             for key, phrases in key2ph.items():
                 print(f"{key}: {phrases}")
+            print(f"\rBuffer: {buffer}", end='', flush=True)  # Refresh the prompt
             continue
 
         if char == ' ':
@@ -125,6 +126,13 @@ def input_loop(key2ph):
             pos = len(buffer)
             continue
 
+        if ord(char) in (8, 127):  # Backspace key
+            if buffer:
+                buffer = buffer[:-1]  # Remove the last character from the buffer
+                pos = min(pos, len(buffer))  # Adjust pos if necessary
+                print(f"\rBuffer: {buffer}", end='', flush=True)  # Refresh the prompt
+            continue
+
         buffer += char
         num = 0  # Reset number on non-digit input
 
@@ -133,6 +141,7 @@ def input_loop(key2ph):
             print("\nOptions:")
             for idx, (_, option) in enumerate(options, start=1):
                 print(f"{idx}: {''.join(option)}")
+            print(f"\rBuffer: {buffer}", end='', flush=True)  # Refresh the prompt
 
 if __name__ == "__main__":
     # Specify your .cin file path here
