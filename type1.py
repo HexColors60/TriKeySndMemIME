@@ -106,11 +106,17 @@ def input_loop(key2ph):
                 english, num_str = pair
                 num = int(num_str) if num_str else 1  # Default to 1 if no number is provided
 
-                # Find the English key in key2ph
-                if english in key2ph and 1 <= num <= len(key2ph[english]):
-                    # Append the corresponding phrase to output_buffer
-                    output_buffer += ''.join(key2ph[english][num - 1][1])
-            
+                # 查找 key2ph 中的對應鍵值
+                if english in key2ph:
+                    # 檢查 num 是否匹配 key2ph 中的第一個數字
+                    matched_phrase = next(
+                        (phrase_list for number, phrase_list in key2ph[english] if number == num),
+                        None
+                    )
+                    if matched_phrase:
+                        # 將對應的短語加入到 output_buffer
+                        output_buffer += ''.join(matched_phrase)
+                    
             print(f"\nOutput: {output_buffer}")
             
             # Reset the buffers and position counters
