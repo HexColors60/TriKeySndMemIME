@@ -16,22 +16,37 @@ def getch():
     return char
 
 def parse_word_file(file_name, word2pinyin, key2ph):
+    def unescape_string(s):
+        """將轉義字符轉換為對應的實際字符"""
+        return s.replace(r'\"', '"').replace(r'\t', '\t').replace(r'\n', '\n')
+    
     with open(file_name, 'r', encoding='utf-8') as file:
         for line in file:
             line = line.strip()  # 去除行首尾的空白
             if not line:  # 跳過空行
                 continue
 
-            # 分割行內容
-            parts = re.split(r'[\s\t]+', line, maxsplit=1)
-
-            words = [parts[0]]  # 第一部分是詞組，視為整體
-            rest = parts[1] if len(parts) > 1 else ''  # 如果有剩餘內容則處理
-
+            # 判斷是否是以引號開頭的字符串
+            if line.startswith('"'):
+                # 找到結束的引號位置，處理轉義字符
+                match = re.match(r'"(.*?)"\s*(.*)', line)
+                if not match:
+                    print(f"Invalid format in line: {line}")
+                    continue
+                
+                # 提取詞組和剩餘內容
+                raw_words, rest = match.groups()
+                words = [unescape_string(raw_words)]  # 將轉義字符解析為正常字符串
+            else:
+                # 傳統模式處理
+                parts = re.split(r'[\s\t]+', line, maxsplit=1)
+                words = [parts[0]]  # 第一部分是詞組，視為整體
+                rest = parts[1] if len(parts) > 1 else ''
+            
             num1 = -1  # 預設索引值
             key1 = None
 
-            # 檢查剩餘內容
+            # 檢查剩餘內容是否包含 key/number
             if rest.isdigit():
                 num1 = int(rest)
             elif re.match(r'^[a-zA-Z]+\d*$', rest):
@@ -41,9 +56,9 @@ def parse_word_file(file_name, word2pinyin, key2ph):
                     if match[2]:
                         num1 = int(match[2])
 
-            # 如果 key1 為空，根據詞組生成 key1
+            # 如果 key1 為空，根據詞組生成 key1，默認為 'v'
             if not key1:
-                key1 = ''.join(word2pinyin.get(char, '') for word in words for char in word)
+                key1 = ''.join(word2pinyin.get(char, 'v') for word in words for char in word)
 
             # 構建 key2ph
             if key1:
