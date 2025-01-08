@@ -1,0 +1,45 @@
+原創: 音憶碼 歷史篇
+
+原創: 音憶碼(三碼無重碼音憶輸入法) 歷史篇
+
+https://github.com/HexColors60/TriKeySndMemIME
+(未完成)
+作者: enthos
+授權: MIT
+
+我的舊方案概念:
+
+烈: 歹 右刀 下火 b b f # bad blade fire
+英: 上草 央 (大) g c b # grass center big
+言: 言 (口) (一) w m o # words mouth one
+姓: 女 生 (土)   g n d # girl born dust
+檔: 木 當上 田   t w f # tree when field
+
+舊名: "千萬字塊碼"
+進度: 編碼中, 目前 2187 個字根, 15681 個字.
+
+$ grep 萬 uniok_utf8.txt
+U+52A2  $ 簡萬 力 # 蛗 (gb)
+U+52F1 : 萬 力   # 勱 (b5)
+U+5389  $ 簡厲 # 厚上 簡萬 # = big5 厲 # 癆 (gb)
+U+53B2 : 厚上 萬 # 厲 (b5)
+U+56C6 : 口 萬 虫   # 囆 (b5)
+U+6FAB : 左水 萬   # 澫 (b5)
+U+71E4 : 火 萬    # 燤 (b5)
+U+75A0  $ 病左上 簡萬 # 謳 (gb)
+U+7658 : 病左上 萬   # 癘 (b5)
+U+79BA : 禺 (點) # 似乎查不到, 但 萬是跟 禹同部首 # page 123   # 禺 (b5)
+U+842C: 上草 禺 (點)   # 萬 (b5)
+U+867F  $ 簡萬 虫 # 繰 (gb)
+U+8806 : 萬 虫 # 蠆 (b5)
+U+8DB8  $ 簡萬 足 # 齠 (gb)
+U+8E89 : 萬 足 # 躉 (b5)
+U+8FC8 過左下 簡萬 # U+9081   # 闐 (gb)
+U+9081 : 過左下 萬    # 邁 (b5)
+
+約 22886 字, 一直未完成.
+這種方式會遇到問題, 有些字根需要兩個編碼, 太難實現了.
+
+第一次公開發佈:
+https://github.com/HexColors60/TriKeySndMemIME/blob/main/uniok_utf8.txt
+
