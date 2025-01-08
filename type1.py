@@ -49,7 +49,18 @@ def parse_word_file(file_name, word2pinyin, key2ph):
             if key1:
                 if key1 not in key2ph:
                     key2ph[key1] = []
-                key2ph[key1].append((num1 if num1 != -1 else len(key2ph[key1]) + 1, words))
+                
+                # 提取當前已存在的數字
+                existing_numbers = {num for num, _ in key2ph[key1]}
+                
+                # 如果 num1 是 -1，選擇下一個未使用的數字
+                if num1 == -1:
+                    num1 = 1  # 從 1 開始
+                    while num1 in existing_numbers:
+                        num1 += 1
+
+                # 添加新項目
+                key2ph[key1].append((num1, words))
 
 def parse_cin_file(cin_file):
     word2pinyin = {}
