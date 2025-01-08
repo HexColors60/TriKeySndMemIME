@@ -134,6 +134,7 @@ def input_loop(key2ph):
             buffer = ''
             output_buffer = ''
             num = 0
+            pos = 0
             continue
 
         if char.isdigit():
