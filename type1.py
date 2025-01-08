@@ -98,10 +98,21 @@ def input_loop(key2ph):
             continue
 
         if char == ' ':
-            # On space, process the output
-            if buffer in key2ph and 1 <= num <= len(key2ph[buffer]):
-                output_buffer += ''.join(key2ph[buffer][num - 1][1])
+            # Split the buffer into English + number pairs
+            pairs = re.findall(r'([a-zA-Z]+)(\d+)?', buffer)
+            
+            for pair in pairs:
+                english, num_str = pair
+                num = int(num_str) if num_str else 1  # Default to 1 if no number is provided
+
+                # Find the English key in key2ph
+                if english in key2ph and 1 <= num <= len(key2ph[english]):
+                    # Append the corresponding phrase to output_buffer
+                    output_buffer += ''.join(key2ph[english][num - 1][1])
+            
             print(f"\nOutput: {output_buffer}")
+            
+            # Reset the buffers and position counters
             buffer = ''
             output_buffer = ''
             num = 0
