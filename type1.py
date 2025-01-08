@@ -145,9 +145,10 @@ def input_loop(key2ph):
         if buffer[pos:] in key2ph:
             options = key2ph[buffer[pos:]]
             print("\nOptions:")
-            for idx, (_, option) in enumerate(options, start=1):
-                print(f"{idx}: {''.join(option)}")
-            print(f"\rBuffer: {buffer}", end='', flush=True)  # Refresh the prompt
+            for idx, (number, option) in enumerate(options, start=1):
+                # 確保顯示的序號與 key2ph 中的數字一致
+                print(f"{number}: {''.join(option)}")
+            print(f"\rBuffer: {buffer}", end='', flush=True)  # 刷新提示符
 
 if __name__ == "__main__":
     # Specify your .cin file path here
