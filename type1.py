@@ -77,6 +77,7 @@ def input_loop(key2ph):
     buffer = ''
     output_buffer = ''
     num = 0  # To track multi-digit input
+    pos = 0
     while True:
         try:
             char = getch()
@@ -109,13 +110,15 @@ def input_loop(key2ph):
         if char.isdigit():
             # Handle multi-digit number
             num = num * 10 + int(char)
+            buffer += char
+            pos = len(buffer)
             continue
 
         buffer += char
         num = 0  # Reset number on non-digit input
 
-        if buffer in key2ph:
-            options = key2ph[buffer]
+        if buffer[pos:] in key2ph:
+            options = key2ph[buffer[pos:]]
             print("\nOptions:")
             for idx, (_, option) in enumerate(options, start=1):
                 print(f"{idx}: {''.join(option)}")
