@@ -19,7 +19,7 @@ def parse_word_file(file_name, word2pinyin, key2ph):
     def unescape_string(s):
         """將轉義字符轉換為對應的實際字符"""
         return s.replace(r'\"', '"').replace(r'\t', '\t').replace(r'\n', '\n')
-    
+
     with open(file_name, 'r', encoding='utf-8') as file:
         for line in file:
             line = line.strip()  # 去除行首尾的空白
@@ -33,7 +33,7 @@ def parse_word_file(file_name, word2pinyin, key2ph):
                 if not match:
                     print(f"Invalid format in line: {line}")
                     continue
-                
+
                 # 提取詞組和剩餘內容
                 raw_words, rest = match.groups()
                 words = [unescape_string(raw_words)]  # 將轉義字符解析為正常字符串
@@ -42,7 +42,7 @@ def parse_word_file(file_name, word2pinyin, key2ph):
                 parts = re.split(r'[\s\t]+', line, maxsplit=1)
                 words = [parts[0]]  # 第一部分是詞組，視為整體
                 rest = parts[1] if len(parts) > 1 else ''
-            
+
             num1 = -1  # 預設索引值
             key1 = None
 
@@ -58,16 +58,17 @@ def parse_word_file(file_name, word2pinyin, key2ph):
 
             # 如果 key1 為空，根據詞組生成 key1，默認為 'v'
             if not key1:
-                key1 = ''.join(word2pinyin.get(char, 'v') for word in words for char in word)
+                key1_parts = [word2pinyin.get(char, '') for word in words for char in word]
+                key1 = ''.join(key1_parts) if any(key1_parts) else 'v'  # 如果沒有拼音，僅使用單一的 'v'
 
             # 構建 key2ph
             if key1:
                 if key1 not in key2ph:
                     key2ph[key1] = []
-                
+
                 # 提取當前已存在的數字
                 existing_numbers = {num for num, _ in key2ph[key1]}
-                
+
                 # 如果 num1 是 -1，選擇下一個未使用的數字
                 if num1 == -1:
                     num1 = 1  # 從 1 開始
