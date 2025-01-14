@@ -21,14 +21,14 @@ def paginate(data, lines_per_page=25):
         for line in data[i:i + lines_per_page]:
             print(line)
         if i + lines_per_page < len(data):
-            print("--- 按空白鍵繼續，或 Ctrl-C 結束 ---\n", end="", flush=True)
+            print("--- 按空白鍵繼續，或 q 結束 ---\n", end="", flush=True)
             while True:
                 char = getch()
                 if char == ' ':
                     break
-                elif char in ('\x03', '\x04'):  # Ctrl-C or Ctrl-D
-                    print("\nExiting.")
-                    sys.exit(0)
+                elif char == 'q':
+                    print("\nExiting pagination.")
+                    return
                     
 def parse_word_file(file_name, word2pinyin, key2ph):
     def unescape_string(s):
