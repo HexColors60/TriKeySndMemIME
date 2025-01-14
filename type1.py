@@ -15,6 +15,21 @@ def getch():
         termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
     return char
 
+def paginate(data, lines_per_page=25):
+    """分頁顯示內容，每頁顯示指定行數。"""
+    for i in range(0, len(data), lines_per_page):
+        for line in data[i:i + lines_per_page]:
+            print(line)
+        if i + lines_per_page < len(data):
+            print("--- 按空白鍵繼續，或 Ctrl-C 結束 ---\n", end="", flush=True)
+            while True:
+                char = getch()
+                if char == ' ':
+                    break
+                elif char in ('\x03', '\x04'):  # Ctrl-C or Ctrl-D
+                    print("\nExiting.")
+                    sys.exit(0)
+                    
 def parse_word_file(file_name, word2pinyin, key2ph):
     def unescape_string(s):
         """將轉義字符轉換為對應的實際字符"""
@@ -120,11 +135,11 @@ def input_loop(key2ph):
 
         if char == '~':
             print("\nKey2Ph Table:")
-            for key, phrases in key2ph.items():
-                print(f"{key}: {phrases}")
-            print(f"\rBuffer: {buffer}", end='', flush=True)  # Refresh the prompt
+            output = [f"{key}: {phrases}" for key, phrases in key2ph.items()]
+            paginate(output)
+            print(f"\rBuffer: {buffer}", end='', flush=True)
             continue
-
+            
         if char == ' ':
             # Split the buffer into English + number pairs
             pairs = re.findall(r'([a-zA-Z]+)(\d+)?', buffer)
