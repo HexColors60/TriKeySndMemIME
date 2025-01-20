@@ -193,6 +193,24 @@ def input_loop(key2ph):
                 print(f"{number}: {''.join(option)}")
             print(f"\rBuffer: {buffer}", end='', flush=True)  # 刷新提示符
 
+def parse_mem_file(file_name):
+    """解析 tmp_tksm_words.txt 檔案為 mem2char 格式。"""
+    mem2char = {}
+    with open(file_name, 'r', encoding='utf-8') as file:
+        for line in file:
+            line = line.strip()
+            if not line or line.startswith("##"):  # 跳過註解行和空行
+                continue
+            
+            match = re.match(r'^([a-z]{2})\s+(.{26})$', line)
+            if match:
+                index = match[1]
+                data = list(match[2])
+                mem2char[index] = data
+            else:
+                print(f"Invalid line format: {line}")
+    return mem2char
+
 if __name__ == "__main__":
     # Specify your .cin file path here
     cin_file = 'pinyin.cin'
@@ -205,5 +223,10 @@ if __name__ == "__main__":
     for file_name in os.listdir():
         if re.match(r'word.*\.txt$', file_name):
             parse_word_file(file_name, word2pinyin, key2ph)
+
+    mem_file = 'tmp_tksm_words.txt'
+    if os.path.exists(mem_file):
+        mem2char = parse_mem_file(mem_file)
+        print("Parsed mem2char data loaded.")
 
     input_loop(key2ph)
