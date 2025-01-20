@@ -190,8 +190,11 @@ def input_loop(key2ph, mem2char):
                     groups = [raw_chars[i:i+3] for i in range(0, len(raw_chars), 3)]
                     left_chars = ''
                     for group in groups:
-                        if len(group) == 3 and group in mem2char:
-                            output_buffer += ''.join(mem2char[group])
+                        if len(group) == 3:
+                            key = group[:2]  # Extract the first two characters as the key
+                            index = ord(group[2]) - ord('a')  # Convert the third character to an index (0-25)
+                            if key in mem2char and 0 <= index < len(mem2char[key]):
+                                output_buffer += mem2char[key][index]
                         else:
                             left_chars += group
                     
