@@ -29,8 +29,33 @@ def paginate(data, lines_per_page=25):
                 elif char == 'q':
                     print("\nExiting pagination.")
                     return
-                    
+
+def parse_mem_file(file_name):
+    """解析 tmp_tksm_words.txt 檔案為 mem2char 格式。
+
+    格式:
+    每行由索引（兩個小寫字母）和26個Unicode字符組成，例如：
+    aa ﹏﹏﹏黯﹏﹏暗﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏
+    """
+    mem2char = {}
+    with open(file_name, 'r', encoding='utf-8') as file:
+        for line in file:
+            line = line.strip()
+            if not line or line.startswith("##"):  # 跳過註解行和空行
+                continue
+
+            # 匹配索引和26個字符
+            match = re.match(r'^([a-z]{2})\s+(.{26})$', line)
+            if match:
+                index = match[1]  # 索引（例如 'aa', 'ab'）
+                data = list(match[2])  # 26個Unicode字符
+                mem2char[index] = data
+            else:
+                print(f"Invalid line format: {line}")
+    return mem2char
+
 def parse_word_file(file_name, word2pinyin, key2ph):
+    """解析單詞檔案，建立 key2ph 結構，用於查詢詞組與鍵位關聯。"""
     def unescape_string(s):
         """將轉義字符轉換為對應的實際字符"""
         return s.replace(r'\"', '"').replace(r'\t', '\t').replace(r'\n', '\n')
@@ -94,6 +119,7 @@ def parse_word_file(file_name, word2pinyin, key2ph):
                 key2ph[key1].append((num1, words))
 
 def parse_cin_file(cin_file):
+    """解析 .cin 檔案，建立 word2pinyin 結構。"""
     word2pinyin = {}
     with open(cin_file, 'r', encoding='utf-8') as file:
         in_chardef = False
@@ -108,17 +134,18 @@ def parse_cin_file(cin_file):
             if in_chardef:
                 match = re.match(r'^([a-zA-Z]*\d*)\s+([\u4e00-\u9fff]+):?.*$', line)
                 if match:
-                    english = match[1]
-                    character = match[2][0]
+                    english = match[1]  # 英文字母鍵
+                    character = match[2][0]  # 對應的漢字
                     if character not in word2pinyin:
                         word2pinyin[character] = english[0] if english else ''
     return word2pinyin
 
-def input_loop(key2ph):
+def input_loop(key2ph, mem2char):
+    """用戶輸入循環，支持即時查詢 key2ph 和 mem2char 結構。"""
     print("Enter input mode (Ctrl-C or Ctrl-D to exit):")
     buffer = ''
     output_buffer = ''
-    num = 0  # To track multi-digit input
+    num = 0
     pos = 0
     while True:
         try:
@@ -127,11 +154,11 @@ def input_loop(key2ph):
             print("\nExiting.")
             break
 
-        if ord(char) == 3 or ord(char) == 4:  # Check for Ctrl-C (3) or Ctrl-D (4)
+        if ord(char) in (3, 4):  # Ctrl-C (3) or Ctrl-D (4)
             print("\nExiting.")
             break
 
-        print(char, end='', flush=True)  # Echo the input character immediately
+        print(char, end='', flush=True)
 
         if char == '~':
             print("\nKey2Ph Table:")
@@ -143,25 +170,37 @@ def input_loop(key2ph):
         if char == ' ':
             # Split the buffer into English + number pairs
             pairs = re.findall(r'([a-zA-Z]+)(\d+)?', buffer)
-            
+
             for pair in pairs:
                 english, num_str = pair
                 num = int(num_str) if num_str else 1  # Default to 1 if no number is provided
 
                 # 查找 key2ph 中的對應鍵值
                 if english in key2ph:
-                    # 檢查 num 是否匹配 key2ph 中的第一個數字
                     matched_phrase = next(
                         (phrase_list for number, phrase_list in key2ph[english] if number == num),
                         None
                     )
                     if matched_phrase:
-                        # 將對應的短語加入到 output_buffer
                         output_buffer += ''.join(matched_phrase)
+
+                # 當沒有提供數字時，處理 raw_chars
+                if not num_str:
+                    raw_chars = english
+                    groups = [raw_chars[i:i+3] for i in range(0, len(raw_chars), 3)]
+                    left_chars = ''
+                    for group in groups:
+                        if len(group) == 3 and group in mem2char:
+                            output_buffer += ''.join(mem2char[group])
+                        else:
+                            left_chars += group
                     
+                    # 嘗試在 key2ph 中匹配剩餘字符
+                    if left_chars in key2ph:
+                        for _, words in key2ph[left_chars]:
+                            output_buffer += ''.join(words)
+
             print(f"\nOutput: {output_buffer}")
-            
-            # Reset the buffers and position counters
             buffer = ''
             output_buffer = ''
             num = 0
@@ -169,7 +208,6 @@ def input_loop(key2ph):
             continue
 
         if char.isdigit():
-            # Handle multi-digit number
             num = num * 10 + int(char)
             buffer += char
             pos = len(buffer)
@@ -177,42 +215,22 @@ def input_loop(key2ph):
 
         if ord(char) in (8, 127):  # Backspace key
             if buffer:
-                buffer = buffer[:-1]  # Remove the last character from the buffer
-                pos = min(pos, len(buffer))  # Adjust pos if necessary
-                print(f"\rBuffer: {buffer}", end='', flush=True)  # Refresh the prompt
+                buffer = buffer[:-1]
+                pos = min(pos, len(buffer))
+                print(f"\rBuffer: {buffer}", end='', flush=True)
             continue
 
         buffer += char
-        num = 0  # Reset number on non-digit input
+        num = 0
 
         if buffer[pos:] in key2ph:
             options = key2ph[buffer[pos:]]
             print("\nOptions:")
             for idx, (number, option) in enumerate(options, start=1):
-                # 確保顯示的序號與 key2ph 中的數字一致
                 print(f"{number}: {''.join(option)}")
-            print(f"\rBuffer: {buffer}", end='', flush=True)  # 刷新提示符
-
-def parse_mem_file(file_name):
-    """解析 tmp_tksm_words.txt 檔案為 mem2char 格式。"""
-    mem2char = {}
-    with open(file_name, 'r', encoding='utf-8') as file:
-        for line in file:
-            line = line.strip()
-            if not line or line.startswith("##"):  # 跳過註解行和空行
-                continue
-            
-            match = re.match(r'^([a-z]{2})\s+(.{26})$', line)
-            if match:
-                index = match[1]
-                data = list(match[2])
-                mem2char[index] = data
-            else:
-                print(f"Invalid line format: {line}")
-    return mem2char
+            print(f"\rBuffer: {buffer}", end='', flush=True)
 
 if __name__ == "__main__":
-    # Specify your .cin file path here
     cin_file = 'pinyin.cin'
     if not os.path.exists(cin_file):
         print(f"Error: {cin_file} not found.")
@@ -228,5 +246,7 @@ if __name__ == "__main__":
     if os.path.exists(mem_file):
         mem2char = parse_mem_file(mem_file)
         print("Parsed mem2char data loaded.")
+    else:
+        mem2char = {}
 
-    input_loop(key2ph)
+    input_loop(key2ph, mem2char)
