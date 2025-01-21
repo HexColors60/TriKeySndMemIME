@@ -183,6 +183,36 @@ def input_loop(key2ph, mem2char):
                     )
                     if matched_phrase:
                         output_buffer += ''.join(matched_phrase)
+                else:
+                    # 當 key2ph 中無法找到英文單字時，啟用 3 字元分割邏輯
+                    current_pos = 0
+                    buffer2 = english
+                    while len(buffer2[current_pos:]) >= 3:
+                        left_chars = buffer2[current_pos:current_pos + 3]
+                        mem_index = left_chars[:2]  # 前兩個字元作為 mem2char 的索引
+                        offset_char = left_chars[2]  # 第三個字元表示偏移量
+
+                        # 偏移量轉換：從 'a' 開始的索引
+                        if 'a' <= offset_char <= 'z':
+                            offset = ord(offset_char) - ord('a')  # 偏移量
+                            if mem_index in mem2char and offset < len(mem2char[mem_index]):
+                                result_char = mem2char[mem_index][offset]  # 查找對應字元
+                                output_buffer += result_char  # 加入輸出緩衝
+                            else:
+                                output_buffer += '?'  # 無效索引或偏移時用占位符
+                        else:
+                            output_buffer += '?'  # 非 'a'-'z' 範圍字元顯示占位符
+
+                        current_pos += 3  # 更新處理位置
+                        english2 = buffer2[current_pos:]
+                        if english2 in key2ph:
+                            matched_phrase = next(
+                                (phrase_list for number, phrase_list in key2ph[english2] if number == num),
+                                None
+                            )
+                            if matched_phrase:
+                                output_buffer += ''.join(matched_phrase)
+                            break
 
                 # 當沒有提供數字時，處理 raw_chars
                 if not num_str:
