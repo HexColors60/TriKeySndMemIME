@@ -233,6 +233,12 @@ def input_loop(key2ph, mem2char):
                 print(f"{number}: {''.join(option)}")
             print(f"\rBuffer: {buffer}", end='', flush=True)
 
+        if len(buffer[pos:]) == 2:
+            print("\n## ＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺ")
+            if buffer[pos:] in mem2char:
+                print(f"{buffer[pos:]} {''.join(mem2char[buffer[pos:]])}")
+            print(f"\rBuffer: {buffer}", end='', flush=True) 
+
 if __name__ == "__main__":
     cin_file = 'pinyin.cin'
     if not os.path.exists(cin_file):
