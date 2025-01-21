@@ -212,8 +212,10 @@ def input_loop(key2ph, mem2char):
                             )
                             if matched_phrase:
                                 output_buffer += ''.join(matched_phrase)
+                            pos += current_pos
                             break
-
+                    pos += current_pos
+                    
                 # 當沒有提供數字時，處理 raw_chars
                 if not num_str:
                     raw_chars = english
