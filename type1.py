@@ -233,11 +233,44 @@ def input_loop(key2ph, mem2char):
                 print(f"{number}: {''.join(option)}")
             print(f"\rBuffer: {buffer}", end='', flush=True)
 
-        if len(buffer[pos:]) == 2:
+        current_pos = pos  # 使用另一個變數追蹤當前處理位置
+
+        # 迴圈處理每 3 個字元，直到剩餘不足 3 個字元
+        while len(buffer[current_pos:]) >= 3:
+            # 提取左側三個字元
+            left_chars = buffer[current_pos:current_pos + 3]
+            mem_index = left_chars[:2]  # 前兩個字元作為 mem2char 的索引
+            offset_char = left_chars[2]  # 第三個字元表示偏移量
+            
+            # 偏移量轉換：從 'a' 開始的索引
+            if 'a' <= offset_char <= 'z':
+                offset = ord(offset_char) - ord('a')  # 偏移量
+                if mem_index in mem2char and offset < len(mem2char[mem_index]):
+                    result_char = mem2char[mem_index][offset]  # 查找對應字元
+                    print(result_char, end='')  # 直接輸出結果字元
+                else:
+                    print("?", end='')  # 無效索引或偏移時顯示占位符
+            else:
+                print("?", end='')  # 非 'a'-'z' 範圍字元顯示占位符
+            
+            current_pos += 3  # 更新處理位置
+
+        # 處理剩餘不足 3 個字元的情況（執行舊邏輯）
+        if len(buffer[current_pos:]) == 2:
             print("\n## ＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺ")
-            if buffer[pos:] in mem2char:
-                print(f"{buffer[pos:]} {''.join(mem2char[buffer[pos:]])}")
-            print(f"\rBuffer: {buffer}", end='', flush=True) 
+            if buffer[current_pos:] in mem2char:
+                result_chars = ''.join(mem2char[buffer[current_pos:]])
+                print(f"{buffer[current_pos:]} {result_chars}")
+
+        print(f"\nBuffer: {buffer}", end='', flush=True)
+
+        if buffer[current_pos:] in key2ph:
+            options = key2ph[buffer[current_pos:]]
+            print("\nOptions:")
+            for idx, (number, option) in enumerate(options, start=1):
+                print(f"{number}: {''.join(option)}")
+            print(f"\rBuffer: {buffer}", end='', flush=True)
+
 
 if __name__ == "__main__":
     cin_file = 'pinyin.cin'
