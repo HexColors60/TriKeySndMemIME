@@ -174,12 +174,13 @@ def input_loop(key2ph, mem2char):
                 options = key2ph[substring]
                 for idx, (number, option) in enumerate(options, start=1):
                     print(f"{idx}: {substring}{number} {''.join(option)}")
-                choice = getch()
-                if choice.isdigit():
-                    index = int(choice) - 1
-                    if 0 <= index < len(options):
-                        selected = options[index][1]
-                        print(f"\nSelected: {''.join(selected)}")
+                # choice = getch()
+                # if choice.isdigit():
+                #    index = int(choice) - 1
+                #    if 0 <= index < len(options):
+                #        selected = options[index][1]
+                #        print(f"\nSelected: {''.join(selected)}")
+            buffer += char
             continue
             
         if char == ' ':
