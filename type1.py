@@ -169,11 +169,17 @@ def input_loop(key2ph, mem2char):
 
         if char == ';':
             substring = buffer[pos:]
-            if substring in key2ph:
-                print("\nOptions:")
-                options = key2ph[substring]
-                for idx, (number, option) in enumerate(options, start=1):
-                    print(f"{idx}: {substring}{number} {''.join(option)}")
+            matched_keys = [key for key in key2ph if key.startswith(substring)]
+            if matched_keys:
+                options = []
+                for key in matched_keys:
+                    # options += key2ph[key]
+                    for number, phrase in key2ph[key]:
+                        options.append((key, number, phrase))
+#                for idx, (key, number, option) in enumerate(options, start=1):
+#                    print(f"{idx}: {substring}{number} {''.join(option)}")
+                for idx, (key, number, option) in enumerate(options, start=1):
+                    print(f"{idx}: {key}{number} {''.join(option)}")
                 # choice = getch()
                 # if choice.isdigit():
                 #    index = int(choice) - 1
@@ -196,11 +202,16 @@ def input_loop(key2ph, mem2char):
                 if ';' in english:
                     # Handle logic when ';' is present
                     substring = english.replace(';', '')
-                    if substring in key2ph:
-                        options = key2ph[substring]
-                        for idx, (number, option) in enumerate(options, start=1):
-                            if num == idx:
-                                output_buffer += ''.join(option)
+                    matched_keys = [key for key in key2ph if key.startswith(substring)]
+                    if matched_keys:
+                        options = []
+                    for key in matched_keys:
+#                        options += key2ph[key]
+                        for number, phrase in key2ph[key]:
+                            options.append((key, number, phrase))
+                    for idx, (key, number, option) in enumerate(options, start=1):
+                        if num == idx:
+                            output_buffer += ''.join(option)
                 else:
                     # Old logic when ';' is not present
                     if english in key2ph:
