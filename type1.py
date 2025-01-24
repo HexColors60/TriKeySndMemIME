@@ -106,6 +106,19 @@ def parse_word_file(file_name, word2pinyin, key2ph):
                 if key1 not in key2ph:
                     key2ph[key1] = []
 
+                # 查找是否已存在相同 key 和數字，但數據不同
+                conflicting_entry = next((entry for entry in key2ph[key1] if entry[0] == num1 and entry[1] != words), None)
+                if conflicting_entry:
+                    # 更新舊條目並分配新數字
+                    existing_numbers = {num for num, _ in key2ph[key1]}
+                    new_num = 1
+                    while new_num in existing_numbers:
+                        new_num += 1
+                    key2ph[key1].remove(conflicting_entry)
+                    key2ph[key1].append((new_num, conflicting_entry[1]))
+                    key2ph[key1].append((num1, words))
+                    continue
+
                 # 查找是否已存在相同的詞組與鍵位
                 existing_entry = next((entry for entry in key2ph[key1] if entry[1] == words), None)
 
