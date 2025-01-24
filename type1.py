@@ -117,6 +117,7 @@ def parse_word_file(file_name, word2pinyin, key2ph):
                     key2ph[key1].remove(conflicting_entry)
                     key2ph[key1].append((new_num, conflicting_entry[1]))
                     key2ph[key1].append((num1, words))
+                    key2ph[key1].sort(key=lambda x: x[0])  # 按數字排序
                     continue
 
                 # 查找是否已存在相同的詞組與鍵位
@@ -136,10 +137,12 @@ def parse_word_file(file_name, word2pinyin, key2ph):
                 elif existing_entry:
                     key2ph[key1].remove(existing_entry)
                     key2ph[key1].append((num1, words))
+                    key2ph[key1].sort(key=lambda x: x[0])  # 按數字排序
                     continue
 
                 # 添加新項目
                 key2ph[key1].append((num1, words))
+                key2ph[key1].sort(key=lambda x: x[0])  # 按數字排序
 
 def parse_cin_file(cin_file):
     """解析 .cin 檔案，建立 word2pinyin 結構。"""
