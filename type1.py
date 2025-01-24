@@ -106,14 +106,24 @@ def parse_word_file(file_name, word2pinyin, key2ph):
                 if key1 not in key2ph:
                     key2ph[key1] = []
 
-                # 提取當前已存在的數字
-                existing_numbers = {num for num, _ in key2ph[key1]}
+                # 查找是否已存在相同的詞組與鍵位
+                existing_entry = next((entry for entry in key2ph[key1] if entry[1] == words), None)
 
-                # 如果 num1 是 -1，選擇下一個未使用的數字
+                # 如果 num1 是 -1 且已有相同項目，則不添加新項目
                 if num1 == -1:
+                    if existing_entry:
+                        continue
+                    # 選擇下一個未使用的數字
+                    existing_numbers = {num for num, _ in key2ph[key1]}
                     num1 = 1  # 從 1 開始
                     while num1 in existing_numbers:
                         num1 += 1
+
+                # 如果存在相同的項目且 num1 不為 -1，替換數字
+                elif existing_entry:
+                    key2ph[key1].remove(existing_entry)
+                    key2ph[key1].append((num1, words))
+                    continue
 
                 # 添加新項目
                 key2ph[key1].append((num1, words))
