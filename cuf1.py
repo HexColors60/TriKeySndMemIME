@@ -190,7 +190,81 @@ def parse_lime_file(lime_file):
                     word2pinyin[character] = english[0] if english else ''
     return word2pinyin, keys2word
 
+import string
+
+def xlen(text):
+    """Calculate the display length of a string where non-ASCII, non-symbols count as 2."""
+    symbols = set(string.punctuation + string.whitespace)
+    return sum(2 if ord(c) > 127 or c not in symbols and not c.isascii() else 1 for c in text)
+
+def format_options(options, width=80):
+    lines = []
+    current_line = ""
+
+    for idx, (key, option) in enumerate(options, start=1):
+        entry = f"{idx}: {key} {''.join(option)}"
+
+        if xlen(current_line) + xlen(entry) + 2 <= width:  # +2 for ", "
+            current_line += (", " if current_line else "") + entry
+        else:
+            lines.append(current_line)
+            current_line = entry  # Start a new line with the current entry
+
+    if current_line:
+        lines.append(current_line)
+
+    return "\n".join(lines)
+
+
+def format_options_old(options, width=80):
+    lines = []
+    current_line = ""
+    
+    for idx, (key, option) in enumerate(options, start=1):
+        entry = f"{idx}: {key} {''.join(option)}"
+        
+        if len(current_line) + len(entry) + 2 <= width:  # +2 for ", "
+            current_line += (", " if current_line else "") + entry
+        else:
+            lines.append(current_line)
+            current_line = entry  # Start a new line with the current entry
+    
+    if current_line:
+        lines.append(current_line)
+
+    return "\n".join(lines)
+
+# Example usage:
+# print(format_options(options, width=80))
+
 def input_loop(key2ph, mem2char, keys2word):
+    hint_string_1 = """
+ＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺ
+ㄘㄅㄒㄉㄧㄈㄍㄏㄞㄐㄎㄌㄇㄋㄡㄆ　ㄖㄙㄊㄩㄑㄠㄨㄚㄗ
+ㄟ　ㄕ　ㄝ　ㄜㄛ　ㄓㄤㄥㄢㄣ　　          ㄔ
+　　ˊ　   ˇ　　   ˋ 　ㄦ　　　      ˙　"""
+    hint_string_2 = """
+提示：許氏注音對應規則 第一類：字母對應 (1) 字音相似（發音類似）
+- ㄅ → B, ㄆ → P, ㄇ → M, ㄈ → F, ㄉ → D, ㄊ → T, ㄋ → N, ㄌ → L
+- ㄍ → G, ㄎ → K, ㄏ → H, ㄐ → J, ㄑ → Q, ㄒ → X, ㄖ → R, ㄗ → Z
+- ㄘ → C, ㄙ → S, ㄝ → E, ㄞ → A, ㄟ → E, ㄡ → O, ㄣ → N, ㄧ → I
+
+(2) 字形相似（形狀類似）
+- ㄠ ← W (逆時針轉90度), ㄑ ← V (逆時針轉90度), ㄢ ← M (上下合併)
+- ㄋ ← N (逆時針轉90度), ㄤ ← K (逆時針轉45度), ㄥ ← L (字形相似)
+- ㄦ ← L (ㄦ右半邊與L相似), ㄚ ← Y (字形相似), ㄨ ← X (字形相似)
+- ㄩ ← U (字形相似)
+
+第二類：鍵盤排列記憶
+- ㄗ → Z, ㄘ → C, ㄙ → S (依發音)
+- ㄐ → J, ㄑ → Q, ㄒ → X (音標相似)
+- ㄜ → G, ㄛ → H (手順方便)
+
+【聲調鍵】- 一聲 → 空白鍵, 二聲 → D, 三聲 → F, 四聲 → J, 輕聲 → S """
+
+    print(hint_string_2)
+    print(hint_string_1)
+
     """用戶輸入循環，支持即時查詢 key2ph 和 mem2char 結構。"""
     print("Enter input mode (Ctrl-C or Ctrl-D to exit):")
     buffer = ''
@@ -232,7 +306,7 @@ def input_loop(key2ph, mem2char, keys2word):
             print(f"\rBuffer: {buffer}", end='', flush=True)
             continue
 
-        if char == '/':
+        if char == '`':
             substring = buffer[pos:]
             matched_keys = [key for key in keys2word if key.startswith(substring)]
             if matched_keys:
@@ -242,21 +316,51 @@ def input_loop(key2ph, mem2char, keys2word):
                     for phrase in keys2word[key]:
                         # print(f"DEBUG: Processing key={key}, phrase={phrase}")  # Debug 訊息
                         options.append((key, phrase))
-                for idx, (key, option) in enumerate(options, start=1):
-                    print(f"{idx}: {key} {''.join(option)}")
+                print(format_options(options, width=78))
+
             buffer += char
             print(f"\rBuffer: {buffer}", end='', flush=True)
             continue
             
+        if char == '/':
+            substring = buffer[pos:]
+            matched_keys = [key for key in keys2word if key == substring]
+            if matched_keys:
+                print("\n")
+                options = []
+                for key in matched_keys:
+                    for phrase in keys2word[key]:
+                        # print(f"DEBUG: Processing key={key}, phrase={phrase}")  # Debug 訊息
+                        options.append((key, phrase))
+                print(format_options(options, width=78))
+
+            buffer += char
+            print(f"\rBuffer: {buffer}", end='', flush=True)
+            continue
+
+
         if char == ' ':
             # Split the buffer into English + number pairs, adding ';' to the regex
-            pairs = re.findall(r'([a-zA-Z;/]+)(\d+)?', buffer)
+            pairs = re.findall(r'([a-zA-Z;/`]+)(\d+)?', buffer)
 
             for pair in pairs:
                 english, num_str = pair
                 num = int(num_str) if num_str else 1  # Default to 1 if no number is provided
 
                 if '/' in english:
+                    # Handle logic when '/' is present
+                    substring = english.replace('/', '')
+                    matched_keys = [key for key in keys2word if key == substring]
+                    if matched_keys:
+                        options = []
+                    for key in matched_keys:
+                        for phrase in keys2word[key]:
+                            options.append((key, phrase))
+                    for idx, (key, option) in enumerate(options, start=1):
+                        if num == idx:
+                            output_buffer += ''.join(option)
+                # Check if ';' exists in the current 'english' part
+                elif '`' in english:
                     # Handle logic when '/' is present
                     substring = english.replace('/', '')
                     matched_keys = [key for key in keys2word if key.startswith(substring)]
@@ -347,6 +451,7 @@ def input_loop(key2ph, mem2char, keys2word):
             output_buffer = ''
             num = 0
             pos = 0
+            print(hint_string_1)
             continue
 
         if char.isdigit():
