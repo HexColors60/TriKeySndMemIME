@@ -242,7 +242,7 @@ def input_loop(key2ph, mem2char, keys2word):
 ＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺ
 ㄘㄅㄒㄉㄧㄈㄍㄏㄞㄐㄎㄌㄇㄋㄡㄆ　ㄖㄙㄊㄩㄑㄠㄨㄚㄗ
 ㄟ　ㄕ　ㄝ　ㄜㄛ　ㄓㄤㄥㄢㄣ　　          ㄔ
-　　ˊ　   ˇ　　   ˋ 　ㄦ　　　      ˙　"""
+　　  ˊ　 ˇ　　   ˋ 　ㄦ　　　      ˙　"""
     hint_string_2 = """
 提示：許氏注音對應規則 第一類：字母對應 (1) 字音相似（發音類似）
 - ㄅ → B, ㄆ → P, ㄇ → M, ㄈ → F, ㄉ → D, ㄊ → T, ㄋ → N, ㄌ → L
@@ -451,6 +451,10 @@ def input_loop(key2ph, mem2char, keys2word):
             output_buffer = ''
             num = 0
             pos = 0
+            print(hint_string_1)
+            continue
+            
+        if char == '\t':
             print(hint_string_1)
             continue
 
