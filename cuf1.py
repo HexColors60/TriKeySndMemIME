@@ -277,8 +277,13 @@ def input_loop(key2ph, mem2char, keys2word):
         print(char, end='', flush=True)
 
         if char == '~':
+            substring = buffer[pos:]
             print("\nKey2Ph Table:")
-            output = [f"{key}: {phrases}" for key, phrases in key2ph.items()]
+            matched_keys = [key for key in key2ph if key.startswith(substring)]
+            if matched_keys:
+                output = [f"{key}: {key2ph[key]}" for key in matched_keys]
+            else:
+                output = [f"{key}: {phrases}" for key, phrases in key2ph.items()]
             paginate(output)
             print(f"\rBuffer: {buffer}", end='', flush=True)
             continue
@@ -300,6 +305,8 @@ def input_loop(key2ph, mem2char, keys2word):
 
         if char == '`':
             substring = buffer[pos:]
+            if len(substring) == 0:
+                continue;
             matched_keys = [key for key in keys2word if key.startswith(substring)]
             if matched_keys:
                 print("\n")
@@ -354,16 +361,17 @@ def input_loop(key2ph, mem2char, keys2word):
                 # Check if ';' exists in the current 'english' part
                 elif '`' in english:
                     # Handle logic when '/' is present
-                    substring = english.replace('/', '')
-                    matched_keys = [key for key in keys2word if key.startswith(substring)]
-                    if matched_keys:
-                        options = []
-                    for key in matched_keys:
-                        for phrase in keys2word[key]:
-                            options.append((key, phrase))
-                    for idx, (key, option) in enumerate(options, start=1):
-                        if num == idx:
-                            output_buffer += ''.join(option)
+                    substring = english.replace('`', '')
+                    if len(substring) > 0:
+                        matched_keys = [key for key in keys2word if key.startswith(substring)]
+                        if matched_keys:
+                            options = []
+                        for key in matched_keys:
+                            for phrase in keys2word[key]:
+                                options.append((key, phrase))
+                        for idx, (key, option) in enumerate(options, start=1):
+                            if num == idx:
+                                output_buffer += ''.join(option)
                 # Check if ';' exists in the current 'english' part
                 elif ';' in english:
                     # Handle logic when ';' is present
