@@ -198,39 +198,31 @@ def xlen(text):
     return sum(2 if ord(c) > 127 or c not in symbols and not c.isascii() else 1 for c in text)
 
 def format_options(options, width=80):
-    lines = []
-    current_line = ""
+    grouped_options = {}
 
+    # 將相同 key 的選項分組
     for idx, (key, option) in enumerate(options, start=1):
-        entry = f"{idx}: {key} {''.join(option)}"
+        if key not in grouped_options:
+            grouped_options[key] = []
+        grouped_options[key].append(f"{idx} {option}")
 
-        if xlen(current_line) + xlen(entry) + 2 <= width:  # +2 for ", "
-            current_line += (", " if current_line else "") + entry
-        else:
-            lines.append(current_line)
-            current_line = entry  # Start a new line with the current entry
-
-    if current_line:
-        lines.append(current_line)
-
-    return "\n".join(lines)
-
-
-def format_options_old(options, width=80):
     lines = []
-    current_line = ""
     
-    for idx, (key, option) in enumerate(options, start=1):
-        entry = f"{idx}: {key} {''.join(option)}"
-        
-        if len(current_line) + len(entry) + 2 <= width:  # +2 for ", "
-            current_line += (", " if current_line else "") + entry
-        else:
+    for key in grouped_options:
+        entries = grouped_options[key]
+        current_line = f"{key}: "
+        first = True  # 控制是否加 ", "
+
+        for entry in entries:
+            if xlen(current_line) + xlen(entry) + 2 <= width:  # +2 for ", "
+                current_line += ("" if first else ", ") + entry
+                first = False
+            else:
+                lines.append(current_line)
+                current_line = f"{key}: {entry}"  # 開新行
+
+        if current_line:
             lines.append(current_line)
-            current_line = entry  # Start a new line with the current entry
-    
-    if current_line:
-        lines.append(current_line)
 
     return "\n".join(lines)
 
